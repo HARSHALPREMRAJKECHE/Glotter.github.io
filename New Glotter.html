@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Glotter Translator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(-45deg, #89f7fe, #66a6ff, #9b59b6, #74ebd5);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      animation: fadeInUp 0.8s ease-out;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 500px;
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .input-icon {
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .input-icon input, .input-icon select, .input-icon textarea {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .input-icon i {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      color: #888;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #66a6ff;
+      box-shadow: 0 0 8px #66a6ff;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(90deg, #007acc, #66a6ff);
+      margin-top: 15px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .buttons button {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    #output {
+      margin-top: 20px;
+      min-height: 60px;
+      padding: 12px;
+      background: #f1f1f1;
+      border-radius: 10px;
+      font-size: 18px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    #logoutBtn {
+      background-color: #e63946;
+    }
+
+    #logoutBtn:hover {
+      background-color: #b52a36;
+    }
+
+    .loader {
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+      color: #007acc;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Register Page -->
+<div class="container" id="registerContainer">
+  <h2>📝 Create Account</h2>
+  <div class="input-icon"><i class="fas fa-user"></i><input type="text" id="regName" placeholder="Full Name" required /></div>
+  <div class="input-icon"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder="Email" required /></div>
+  <div class="input-icon"><i class="fas fa-phone"></i><input type="tel" id="regPhone" placeholder="Phone Number" required /></div>
+  <div class="input-icon"><i class="fas fa-lock"></i><input type="password" id="regPassword" placeholder="Password" required /></div>
+  <button onclick="registerUser()">Register</button>
+  <button onclick="goToLogin()">Already have an account? Login</button>
+</div>
+
+<!-- Login Page -->
+<div class="container" id="loginContainer" style="display:none;">
+  <h2>🔐 Login to Glotter</h2>
+  <div class="input-icon"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder="Email" required /></div>
+  <div class="input-icon"><i class="fas fa-phone"></i><input type="tel" id="loginPhone" placeholder="Phone Number" required /></div>
+  <div class="input-icon"><i class="fas fa-lock"></i><input type="password" id="loginPassword" placeholder="Password" required /></div>
+  <button onclick="loginUser()">Login</button>
+  <button onclick="goToRegister()">← Back to Register</button>
+</div>
+
+<!-- Translator Page -->
+<div class="container" id="translatorContainer" style="display:none;">
+  <h2> Glotter</h2>
+  <div class="input-icon"><i class="fas fa-keyboard"></i><textarea id="inputText" placeholder="Type text here..."></textarea></div>
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <select id="fromLang">
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+      <option value="bn">Bengali</option>
+      <option value="te">Telugu</option>
+      <option value="ta">Tamil</option>
+      <option value="mr">Marathi</option>
+      <option value="ur">Urdu</option>
+      <option value="gu">Gujarati</option>
+      <option value="ml">Malayalam</option>
+      <option value="kn">Kannada</option>
+      <option value="or">Oriya</option>
+      <option value="pa">Punjabi</option>
+      <option value="as">Assamese</option>
+      <option value="mai">Maithili</option>
+      <option value="ne">Nepali</option>
+      <option value="si">Sinhalese</option>
+<option value="ar">Arabic</option>
+<option value="zh-CN">Chinese (Simplified)</option>
+<option value="zh-TW">Chinese (Traditional)</option>
+<option value="nl">Dutch</option>
+<option value="fr">French</option>
+<option value="de">German</option>
+<option value="el">Greek</option>
+<option value="he">Hebrew</option>
+<option value="id">Indonesian</option>
+<option value="it">Italian</option>
+<option value="ja">Japanese</option>
+<option value="ko">Korean</option>
+<option value="ms">Malay</option>
+<option value="fa">Persian (Farsi)</option>
+<option value="pl">Polish</option>
+<option value="pt">Portuguese</option>
+<option value="ro">Romanian</option>
+<option value="ru">Russian</option>
+<option value="es">Spanish</option>
+<option value="sv">Swedish</option>
+<option value="th">Thai</option>
+<option value="tr">Turkish</option>
+<option value="uk">Ukrainian</option>
+<option value="vi">Vietnamese</option>
+    </select>
+    <select id="toLang">
+      <option value="hi">Hindi</option>
+      <option value="en">English</option>
+      <option value="bn">Bengali</option>
+      <option value="te">Telugu</option>
+      <option value="ta">Tamil</option>
+      <option value="mr">Marathi</option>
+      <option value="ur">Urdu</option>
+      <option value="gu">Gujarati</option>
+      <option value="ml">Malayalam</option>
+      <option value="kn">Kannada</option>
+      <option value="or">Oriya</option>
+      <option value="pa">Punjabi</option>
+      <option value="as">Assamese</option>
+      <option value="mai">Maithili</option>
+      <option value="ne">Nepali</option>
+      <option value="si">Sinhalese</option>
+<option value="ar">Arabic</option>
+<option value="zh-CN">Chinese (Simplified)</option>
+<option value="zh-TW">Chinese (Traditional)</option>
+<option value="nl">Dutch</option>
+<option value="fr">French</option>
+<option value="de">German</option>
+<option value="el">Greek</option>
+<option value="he">Hebrew</option>
+<option value="id">Indonesian</option>
+<option value="it">Italian</option>
+<option value="ja">Japanese</option>
+<option value="ko">Korean</option>
+<option value="ms">Malay</option>
+<option value="fa">Persian (Farsi)</option>
+<option value="pl">Polish</option>
+<option value="pt">Portuguese</option>
+<option value="ro">Romanian</option>
+<option value="ru">Russian</option>
+<option value="es">Spanish</option>
+<option value="sv">Swedish</option>
+<option value="th">Thai</option>
+<option value="tr">Turkish</option>
+<option value="uk">Ukrainian</option>
+<option value="vi">Vietnamese</option>
+    </select>
+  </div>
+  <div class="buttons">
+    <button onclick="translateText()">🔁 Translate</button>
+    <button onclick="speakText()">🔊 Speak</button>
+    <button onclick="clearFields()">🧹 Clear</button>
+    <button onclick="copyToClipboard()">📋 Copy</button>
+  </div>
+  <div id="output"></div>
+  <div class="loader" id="loader">⏳ Translating...</div>
+  <button id="logoutBtn" onclick="logoutUser()">Logout</button>
+  <button onclick="backToLogin()">← Back to Login</button>
+</div>
+
+<script>
+  function goToLogin() {
+    document.getElementById("registerContainer").style.display = "none";
+    document.getElementById("loginContainer").style.display = "block";
+  }
+
+  function goToRegister() {
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("registerContainer").style.display = "block";
+  }
+
+  function backToLogin() {
+    document.getElementById("translatorContainer").style.display = "none";
+    document.getElementById("loginContainer").style.display = "block";
+  }
+
+  function registerUser() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+
+    if (!name || !email || !phone || !password) {
+      alert("All fields are required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{10}$/;
+
+    if (!emailRegex.test(email)) {
+      alert("Enter a valid email.");
+      return;
+    }
+    if (!phoneRegex.test(phone)) {
+      alert("Enter a valid 10-digit phone number.");
+      return;
+    }
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters.");
+      return;
+    }
+
+    const userData = { name, email, phone, password };
+    localStorage.setItem("glotterUser", JSON.stringify(userData));
+
+    alert("Account created! Please login.");
+    goToLogin();
+  }
+
+  function loginUser() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const phone = document.getElementById('loginPhone').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    const stored = JSON.parse(localStorage.getItem("glotterUser"));
+    if (!stored) {
+      alert("No registered user found.");
+      return;
+    }
+
+    if (email === stored.email && phone === stored.phone && password === stored.password) {
+      document.getElementById("loginContainer").style.display = "none";
+      document.getElementById("translatorContainer").style.display = "block";
+    } else {
+      alert("Login failed. Check your credentials.");
+    }
+  }
+
+  function logoutUser() {
+    document.getElementById("translatorContainer").style.display = "none";
+    document.getElementById("loginContainer").style.display = "block";
+    document.getElementById('inputText').value = "";
+    document.getElementById('output').textContent = "";
+  }
+
+  async function translateText() {
+    const text = document.getElementById('inputText').value.trim();
+    const from = document.getElementById('fromLang').value;
+    const to = document.getElementById('toLang').value;
+    const loader = document.getElementById('loader');
+    const output = document.getElementById('output');
+
+    if (!text) {
+      alert("Please enter text.");
+      return;
+    }
+
+    loader.style.display = 'block';
+    output.textContent = "";
+
+    try {
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      output.textContent = data.responseData.translatedText;
+    } catch {
+      output.textContent = "⚠ Failed to translate.";
+    } finally {
+      loader.style.display = 'none';
+    }
+  }
+
+  function speakText() {
+    const output = document.getElementById('output').textContent;
+    if (output) {
+      const utterance = new SpeechSynthesisUtterance(output);
+      speechSynthesis.speak(utterance);
+    }
+  }
+
+  function clearFields() {
+    document.getElementById('inputText').value = "";
+    document.getElementById('output').textContent = "";
+  }
+
+  function copyToClipboard() {
+    const text = document.getElementById('output').textContent;
+    if (text) {
+      navigator.clipboard.writeText(text)
+        .then(() => alert("Copied to clipboard!"))
+        .catch(() => alert("Failed to copy."));
+    }
+  }
+</script>
+
+</body>
+</html>
+
